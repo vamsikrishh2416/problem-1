@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assignment Evaluation Platform</title>
+    <script>
+      // Polyfill requestIdleCallback (missing in Safari < 16.4)
+      if (!window.requestIdleCallback) {
+        window.requestIdleCallback = function (cb) {
+          return setTimeout(function () {
+            cb({ didTimeout: false, timeRemaining: function () { return 50; } });
+          }, 1);
+        };
+        window.cancelIdleCallback = function (id) { clearTimeout(id); };
+      }
+
+      // Suppress requestIdleCallback errors thrown by browser extensions
+      // (their isolated content-script context can't see the polyfill above).
+      // This must run before any module script so it fires before React's
+      // global error handler, which would otherwise crash the render tree.
+      window.onerror = function (msg, src) {
+        if (typeof msg === 'string' && msg.indexOf('requestIdleCallback') !== -1) {
+          return true; // returning true suppresses the error
+        }
+        return false;
+      };
+      window.addEventListener('error', function (e) {
+        var msg = e.message || (e.error && e.error.message) || '';
+        if (msg.indexOf('requestIdleCallback') !== -1) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+        }
+      }, true);
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
